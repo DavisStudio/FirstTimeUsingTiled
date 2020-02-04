@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="18">
+<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="19">
+ <editorsettings>
+  <export target="level1.json" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" name="landscape-tileset" tilewidth="16" tileheight="16" spacing="2" margin="1" tilecount="165" columns="15">
   <image source="landscape-tileset.png" width="270" height="198"/>
  </tileset>
@@ -212,6 +215,11 @@
   <object id="17" name="enemy1" type="enemySpawner" x="268" y="306" width="113.333" height="9.33333">
    <properties>
     <property name="skull" value=""/>
+   </properties>
+  </object>
+  <object id="18" name="gem4" type="pickUp" gid="68" x="425" y="237" width="16" height="16">
+   <properties>
+    <property name="sprite" value="gem"/>
    </properties>
   </object>
  </objectgroup>

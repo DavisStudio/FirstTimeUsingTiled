@@ -6,7 +6,8 @@ class BaseScene extends Phaser.Scene {
     exitLayer;
     playerOnStairs = false;
     exitScene = false;
-    score = 1;
+    score = 0;
+    scoreText;
 
     constructor(key) {
         super(key);
@@ -19,6 +20,12 @@ class BaseScene extends Phaser.Scene {
         this.skulls = this.physics.add.group({
             allowGravity: false
         });
+
+        console.log(this.scene);
+        this.scoreText = this.add.text(110,110, "Score: " + this.score ,{
+            fontSize: "16px",
+            fill: "white"
+        }).setScrollFactor(0).setDepth(5);
 
         this.exitScene = false;
         this.map.landscape = this.map.addTilesetImage("landscape-tileset", "landscape-image");
@@ -118,11 +125,34 @@ class BaseScene extends Phaser.Scene {
             this.player.setVelocityY(-200);
         }
 
+        let stairTile = this.stairsLayer.getTileAtWorldXY(this.player.x, this.player.y);
+        if(stairTile)
+        {
+            switch(stairTile.index)
+            {
+                case 383:
+                case 319:
+                case 415: 
+                case 351:
+                case 1375:
+                case 1407:
+                case 1439:
+                case 1343: 
+                    this.playerOnStairs = true;
+                    break;   
+            }
+        }
+        else
+        {
+            this.playerOnStairs = false;
+        }
+
     }
 
     createPlayer(object)
     {
         this.player = this.physics.add.sprite(object.x, object.y, "player", 1);
+        this.player.startPos = {x: this.player.x, y: this.player.y};
     }
 
     createGem(object)
@@ -145,7 +175,7 @@ class BaseScene extends Phaser.Scene {
 
         skull.startFollow(
         {
-            duration: 1500,
+            duration: 2500,
             repeat: -1,
             yoyo: true,
             ease: 'Sine.easeInOut'
@@ -159,7 +189,19 @@ class BaseScene extends Phaser.Scene {
         this.collisionLayer.setCollisionBetween(0,1600);
         this.physics.add.collider(this.player, this.collisionLayer);
         this.physics.add.collider(this.skulls, this.collisionLayer);
-        this.physics.add.overlap(this.player, this.skulls, function(obj, obj1),null,this);
+        this.physics.add.overlap(this.player, this.skulls, function(obj, obj1)
+        {
+            this.player.x = this.player.startPos.x
+            this.player.y = this.player.startPos.y
+        },null,this);
+        
+        this.physics.add.overlap(this.player,this.gems,function(obj1, obj2)
+        {
+            this.score++;
+            this.scoreText.text = "Score: " + this.score;
+            obj2.destroy();
+        },null, this);
+
     }
 
     setCamera()
@@ -227,30 +269,12 @@ class SceneA extends BaseScene
                 case 200:
                 case 201:
                 case 206: 
-                case 207:
+                case 207:   
                     this.processExit();
 
                 break;
             }
             
-        }
-
-        let stairTile = this.stairsLayer.getTileAtWorldXY(this.player.x, this.player.y);
-        if(stairTile)
-        {
-            switch(stairTile.index)
-            {
-                case 383:
-                case 319:
-                case 415: 
-                case 351:
-                    this.playerOnStairs = true;
-                    break;   
-            }
-        }
-        else
-        {
-            this.playerOnStairs = false;
         }
     }
 
