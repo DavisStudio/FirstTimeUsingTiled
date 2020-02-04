@@ -16,7 +16,9 @@ class BaseScene extends Phaser.Scene {
     create()
     {
         this.gems = this.physics.add.staticGroup();
-        this.skulls = this.physics.add.group();
+        this.skulls = this.physics.add.group({
+            allowGravity: false
+        });
 
         this.exitScene = false;
         this.map.landscape = this.map.addTilesetImage("landscape-tileset", "landscape-image");
@@ -33,7 +35,7 @@ class BaseScene extends Phaser.Scene {
         this.stairsLayer = this.map.createStaticLayer("stairs", [this.map.landscape, this.map.atlas], 0, 0);
         this.map.getObjectLayer("objects").objects.forEach(function(object)
         {
-            object = retrieveCustomProperties(object);
+            object = this.retrieveCustomProperties(object);
 
             if(object.type === "playerSpawner")
             {
@@ -143,7 +145,7 @@ class BaseScene extends Phaser.Scene {
 
         skull.startFollow(
         {
-            duration: 1000,
+            duration: 1500,
             repeat: -1,
             yoyo: true,
             ease: 'Sine.easeInOut'
@@ -157,6 +159,7 @@ class BaseScene extends Phaser.Scene {
         this.collisionLayer.setCollisionBetween(0,1600);
         this.physics.add.collider(this.player, this.collisionLayer);
         this.physics.add.collider(this.skulls, this.collisionLayer);
+        this.physics.add.overlap(this.player, this.skulls, function(obj, obj1),null,this);
     }
 
     setCamera()
