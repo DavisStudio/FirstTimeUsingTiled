@@ -8,6 +8,7 @@ class BaseScene extends Phaser.Scene {
     exitScene = false;
     score = 0;
     scoreText;
+    gemCount = 0;
 
     constructor(key) {
         super(key);
@@ -158,6 +159,7 @@ class BaseScene extends Phaser.Scene {
     createGem(object)
     {
         this.gems.create(object.x, object.y, "gem");
+        this.gemCount++;
     }
 
     createSkull(object)
@@ -262,7 +264,7 @@ class SceneA extends BaseScene
         super.update();
 
         let tile = this.exitLayer.getTileAtWorldXY(this.player.x, this.player.y);
-        if(tile)
+        if(tile && this.gemCount == this.score)
         {
             switch(tile.index)
             {
@@ -303,7 +305,6 @@ class SceneB extends BaseScene
     init(data)
     {
         this.score = data.score;
-        console.log(data.score);
     }
 
     preload() 
