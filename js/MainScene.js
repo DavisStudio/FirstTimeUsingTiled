@@ -9,6 +9,7 @@ class BaseScene extends Phaser.Scene {
     score = 0;
     scoreText;
     gemCount = 0;
+    warningText;
 
     constructor(key) {
         super(key);
@@ -28,6 +29,11 @@ class BaseScene extends Phaser.Scene {
             fill: "white"
         }).setScrollFactor(0).setDepth(5);
 
+        this.warningText = this.add.text(320,36, "Not Enough Gems" ,{
+            fontSize: "26px",
+            fill: "Red"
+        }).setScrollFactor(1).setDepth(5).setAlpha(0);
+
         this.exitScene = false;
         this.map.landscape = this.map.addTilesetImage("landscape-tileset", "landscape-image");
         this.map.props = this.map.addTilesetImage("props-tileset", "props-image");
@@ -40,6 +46,7 @@ class BaseScene extends Phaser.Scene {
         this.map.createStaticLayer("platforms", [this.map.landscape, this.map.props], 0, 0);
         this.exitLayer = this.map.createStaticLayer("exit", [this.map.landscape, this.map.props], 0, 0);
         this.map.createStaticLayer("foreground", [this.map.landscape, this.map.props], 0, 0);
+        // Ladder Layer added
         this.stairsLayer = this.map.createStaticLayer("stairs", [this.map.landscape, this.map.atlas], 0, 0);
         this.map.getObjectLayer("objects").objects.forEach(function(object)
         {
@@ -81,6 +88,8 @@ class BaseScene extends Phaser.Scene {
 
     update()
     {
+        console.log(this.gemCount);
+
         if(this.cursors.up.isDown && this.playerOnStairs)
         {
             this.player.setVelocityY(-150);
@@ -126,9 +135,14 @@ class BaseScene extends Phaser.Scene {
             this.player.setVelocityY(-200);
         }
 
+        // -------- Runs In The Update ---------------
+        // Gets the current tile that the player is on 
         let stairTile = this.stairsLayer.getTileAtWorldXY(this.player.x, this.player.y);
+        // Checks if the tile has been selected
         if(stairTile)
         {
+            // Checks if the currently selected tiles ID matches with any of the 
+            // Ladders ID's
             switch(stairTile.index)
             {
                 case 383:
@@ -263,8 +277,10 @@ class SceneA extends BaseScene
     {
         super.update();
 
+        this.warningText.setAlpha(0);
+        
         let tile = this.exitLayer.getTileAtWorldXY(this.player.x, this.player.y);
-        if(tile && this.gemCount == this.score)
+        if(tile)
         {
             switch(tile.index)
             {
@@ -272,8 +288,13 @@ class SceneA extends BaseScene
                 case 201:
                 case 206: 
                 case 207:   
-                    this.processExit();
-
+                    if(this.gemCount == this.score){
+                        this.processExit();
+                    }
+                    else
+                    {
+                        this.warningText.setAlpha(1);
+                    }
                 break;
             }
             
@@ -282,19 +303,26 @@ class SceneA extends BaseScene
 
     processExit()
     {
-        if(!this.sceneExit){
-        console.log("exit");
-        this.cameras.main.fadeOut(1000, 53, 22, 74);
+        // Makes sure the Fade only runs Once
+        if (!this.sceneExit)
+        {
+            // Starts the camera fade 
+            this.cameras.main.fadeOut(1000, 53, 22, 74);
+            // Event Listener waits for the camera fade to finish
+            this.cameras.main.once('camerafadeoutcomplete', function (camera)
+            {
+                /* Runs when fade complete
+                   Loads SceneB and passes the amount of gems in this scene and the current Score 
+                   to sceneB
+                */
+                this.scene.start("SceneB", { score: this.score, gemCount: this.gemCount });
 
-        this.cameras.main.once('camerafadeoutcomplete', function (camera) {
-
-            this.scene.start("SceneB", {score: this.score});
-    
-        }, this);
+            }, this);
         }
+        // Makes sure the fade only runs once
         this.sceneExit = true;
-      }
     }
+}
 
 class SceneB extends BaseScene
 {
@@ -305,6 +333,7 @@ class SceneB extends BaseScene
     init(data)
     {
         this.score = data.score;
+        this.gemCount += data.gemCount;
     }
 
     preload() 
@@ -327,5 +356,18 @@ class SceneB extends BaseScene
     loadStart()
     {
         camera.fadeIn(1000, 0, 255, 255);
+    }
+
+    update()
+    {
+        super.update();
+
+        if(this.gemCount == this.score)
+        {
+            this.WinText = this.add.text(250, 300, "You Won" ,{
+                fontSize: "32px",
+                fill: "white"
+            }).setScrollFactor(0).setDepth(5);
+        }
     }
 }
